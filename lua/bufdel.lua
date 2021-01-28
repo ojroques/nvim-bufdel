@@ -6,37 +6,44 @@
 local cmd, fn, vim = vim.cmd, vim.fn, vim
 
 -------------------- FUNCTIONS -----------------------------
-local function switch_buffer(cur_buf, next_buf)
+local function switch_buffer(windows, buf)
   local cur_win = fn.winnr()
-  for _, winid in ipairs(fn.getbufinfo(cur_buf)[1].windows) do
+  for _, winid in ipairs(windows) do
     cmd(string.format('%d wincmd w', fn.win_id2win(winid)))
-    cmd(string.format('buffer %d', next_buf))
+    cmd(string.format('buffer %d', buf))
   end
   cmd(string.format('%d wincmd w', cur_win))
 end
 
-local function delete_buffer(force)
-  local buflisted = fn.getbufinfo({buflisted = 1})
-  local cur_bufnr, next_buf = fn.bufnr()
-  if #buflisted < 2 then
-    cmd 'confirm qall'
-    return
-  end
+local function get_next(buf)
   for i = 0, fn.bufnr('$') - 1 do
-    local buf = (cur_buf + i) % fn.bufnr('$') + 1
-    if fn.buflisted(buf) == 1 then
-      next_buf = buf
-      break
+    local next = (buf + i) % fn.bufnr('$') + 1
+    if fn.buflisted(next) == 1 then
+      return next
     end
   end
-  switch_buffer(cur_buf, next_buf)
-  if fn.getbufvar(cur_bufnr, '&buftype') == 'terminal' then
-    cmd('bd! #')
-  else
-    cmd('silent! confirm bd #')
+end
+
+local function delete_buffer(bufexpr, force)
+  if #fn.getbufinfo({buflisted = 1}) < 2 then
+    if force then
+      cmd('qall!')
+    else
+      cmd('confirm qall')
+    end
+    return
   end
-  if fn.buflisted(buf) == 1 then
-    switch_buffer(next_buf, cur_buf)
+  local cur_buf = type(bufexpr) == 'number' and bufexpr or fn.bufnr(bufexpr)
+  local next_buf = get_next(cur_buf)
+  local windows = fn.getbufinfo(cur_buf)[1].windows
+  switch_buffer(windows, next_buf)
+  if force or fn.getbufvar(cur_buf, '&buftype') == 'terminal' then
+    cmd(string.format('bd! %d', cur_buf))
+  else
+    cmd(string.format('silent! confirm bd %d', cur_buf))
+  end
+  if fn.buflisted(cur_buf) == 1 then
+    switch_buffer(windows, cur_buf)
   end
 end
 
