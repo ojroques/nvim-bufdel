@@ -5,7 +5,7 @@
 -------------------- VARIABLES -----------------------------
 local cmd, fn, vim = vim.cmd, vim.fn, vim
 
--------------------- FUNCTIONS -----------------------------
+-------------------- PRIVATE -------------------------------
 local function switch_buffer(windows, buf)
   local cur_win = fn.winnr()
   for _, winid in ipairs(windows) do
@@ -36,6 +36,7 @@ local function get_buffer(bufexpr)
   return fn.bufnr(bufexpr)
 end
 
+-------------------- PUBLIC --------------------------------
 local function delete_buffer(bufexpr, force)
   if #fn.getbufinfo({buflisted = 1}) < 2 then
     if force then
@@ -63,6 +64,4 @@ local function delete_buffer(bufexpr, force)
 end
 
 ------------------------------------------------------------
-return {
-  delete_buffer = delete_buffer,
-}
+return {delete_buffer = delete_buffer}
