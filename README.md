@@ -3,7 +3,7 @@
 A very small Neovim plugin to improve the deletion of buffers.
 
 Features:
-* Preserve the window layout after deleting a buffer.
+* Preserve the layout of windows after deleting a buffer.
 * Cycle through buffers according to their buffer number, exactly like tabs in
   Chrome / Firefox. This is especially helpful when using a bufferline.
 * Delete terminal buffers without being prompted.
