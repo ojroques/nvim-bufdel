@@ -2,66 +2,67 @@
 -- By Olivier Roques
 -- github.com/ojroques
 
--------------------- VARIABLES -----------------------------
-local cmd, fn, vim = vim.cmd, vim.fn, vim
-
--------------------- PRIVATE -------------------------------
+-- Switch to buffer 'buf' on each window from list 'windows'
 local function switch_buffer(windows, buf)
-  local cur_win = fn.winnr()
+  local cur_win = vim.fn.winnr()
   for _, winid in ipairs(windows) do
-    cmd(string.format('%d wincmd w', fn.win_id2win(winid)))
-    cmd(string.format('buffer %d', buf))
+    vim.cmd(string.format('%d wincmd w', vim.fn.win_id2win(winid)))
+    vim.cmd(string.format('buffer %d', buf))
   end
-  cmd(string.format('%d wincmd w', cur_win))
+  vim.cmd(string.format('%d wincmd w', cur_win))  -- return to original window
 end
 
-local function get_next(buf)
-  for i = 0, fn.bufnr('$') - 1 do
-    local next = (buf + i) % fn.bufnr('$') + 1
-    if fn.buflisted(next) == 1 then
+-- Select the first buffer with a number greater than given buffer
+local function get_next_buf(buf)
+  for i = 0, vim.fn.bufnr('$') - 1 do
+    local next = (buf + i) % vim.fn.bufnr('$') + 1  -- will loop back to 1
+    if vim.fn.buflisted(next) == 1 then
       return next
     end
   end
 end
 
-local function get_buffer(bufexpr)
-  if not bufexpr then
-    return fn.bufnr()
+-- Retrieve the buffer associated to the given name or number
+local function get_buf(bufexpr)
+  if not bufexpr then  -- return current buffer when 'bufexpr' is nil
+    return vim.fn.bufnr()
   end
   if tonumber(bufexpr) then
     return tonumber(bufexpr)
   end
-  bufexpr = string.gsub(bufexpr, [[^['"]+]], '')
-  bufexpr = string.gsub(bufexpr, [[['"]+$]], '')
-  return fn.bufnr(bufexpr)
+  bufexpr = string.gsub(bufexpr, [[^['"]+]], '')  -- escape any start quote
+  bufexpr = string.gsub(bufexpr, [[['"]+$]], '')  -- escape any end quote
+  return vim.fn.bufnr(bufexpr)
 end
 
--------------------- PUBLIC --------------------------------
+-- Delete given buffer, ignoring changes if 'force' is set
 local function delete_buffer(bufexpr, force)
-  if #fn.getbufinfo({buflisted = 1}) < 2 then
+  -- exit neovim when there is only one buffer left
+  if #vim.fn.getbufinfo({buflisted = 1}) < 2 then
     if force then
-      cmd('qall!')
+      vim.cmd('qall!')
     else
-      cmd('confirm qall')
+      vim.cmd('confirm qall')
     end
     return
   end
-  local buf = get_buffer(bufexpr)
-  if fn.buflisted(buf) == 0 then
+  local buf = get_buf(bufexpr)
+  if vim.fn.buflisted(buf) == 0 then  -- exit if buffer number is invalid
     return
   end
-  local next_buf = get_next(buf)
-  local windows = fn.getbufinfo(buf)[1].windows
+  local next_buf = get_next_buf(buf)
+  local windows = vim.fn.getbufinfo(buf)[1].windows
   switch_buffer(windows, next_buf)
-  if force or fn.getbufvar(buf, '&buftype') == 'terminal' then
-    cmd(string.format('bd! %d', buf))
+  -- force deletion of terminal buffers to avoid the prompt
+  if force or vim.fn.getbufvar(buf, '&buftype') == 'terminal' then
+    vim.cmd(string.format('bd! %d', buf))
   else
-    cmd(string.format('silent! confirm bd %d', buf))
+    vim.cmd(string.format('silent! confirm bd %d', buf))
   end
-  if fn.buflisted(buf) == 1 then
+  -- revert buffer switches if user has canceled deletion
+  if vim.fn.buflisted(buf) == 1 then
     switch_buffer(windows, buf)
   end
 end
 
-------------------------------------------------------------
 return {delete_buffer = delete_buffer}
