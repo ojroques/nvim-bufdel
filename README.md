@@ -4,12 +4,19 @@ A very small Neovim plugin to improve the deletion of buffers.
 
 Improvements:
 * **Preserve the layout of windows.** Deleting a buffer will no longer close any
-  window unexpectedly.
+  window unexpectedly (see demo).
 * **Cycle through buffers according to their number.** This is especially
   helpful when using a bufferline: we get the same behavior as closing tabs in
-  Chrome / Firefox.
+  Chrome / Firefox (see demo).
 * **Terminal buffers are deleted without prompt.**
 * **Exit Neovim when last buffer is deleted.**
+
+![demo](./demo.gif)
+
+Here the same buffer is displayed in left and top-right window. Deleting that
+buffer preserves the window layout and the first buffer with a number greater
+than the deleted one is selected instead (the one immediately to the right in
+the bufferline).
 
 ## Installation
 
@@ -45,7 +52,7 @@ The plugin fits in a [single file](./lua/bufdel.lua), you can very well download
 it and include it among your config files.
 
 You can also integrate the command directly into your config. Here's a condensed
-version of the plugin (minus minor optimizations) in Lua:
+version of the plugin (minus minor improvements) in Lua:
 ```lua
 function delete_buffer()
   local buflisted = fn.getbufinfo({buflisted = 1})
