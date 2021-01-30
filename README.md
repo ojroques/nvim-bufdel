@@ -2,28 +2,25 @@
 
 A very small Neovim plugin to improve the deletion of buffers.
 
-Features:
-* Preserve the layout of windows after deleting a buffer.
-* Cycle through buffers according to their buffer number, exactly like tabs in
-  Chrome / Firefox. This is especially helpful when using a bufferline.
-* Delete terminal buffers without being prompted.
-* Exit Neovim when there is only one buffer left.
+Improvements:
+* **Preserve the layout of windows.** Deleting a buffer will no longer close any
+  window unexpectedly.
+* **Cycle through buffers according to their number.** This is especially
+  helpful when using a bufferline: we get the same behavior as closing tabs in
+  Chrome / Firefox.
+* **Terminal buffers are deleted without prompt.**
+* **Exit Neovim when last buffer is deleted.**
 
 ## Installation
 
-#### With Packer
+With [packer.nvim](https://github.com/wbthomason/packer.nvim):
 ```lua
-cmd 'packadd packer.nvim'
-return require('packer').startup(function()
-  use {'ojroques/nvim-bufdel'}
-end)
+use {'ojroques/nvim-bufdel'}
 ```
 
-#### With Plug
+With [vim-plug](https://github.com/junegunn/vim-plug):
 ```vim
-call plug#begin()
 Plug 'ojroques/nvim-bufdel'
-call plug#end()
 ```
 
 ## Usage
@@ -37,9 +34,47 @@ Delete the current buffer and ignore changes:
 :BufDel!
 ```
 
-Delete a buffer by its name or number:
+Delete a buffer by its name or number (use quotes in case the buffer name is a
+number):
 ```vim
 :BufDel <bufexpr>
+```
+
+## Direct Integration
+The plugin fits in a [single file](./lua/bufdel.lua), you can very well download
+it and include it among your config files.
+
+You can also integrate the command directly into your config. Here's a condensed
+version of the plugin (minus minor optimizations) in Lua:
+```lua
+function delete_buffer()
+  local buflisted = fn.getbufinfo({buflisted = 1})
+  local cur_winnr, cur_bufnr = fn.winnr(), fn.bufnr()
+  if #buflisted < 2 then cmd 'confirm qall' return end
+  for _, winid in ipairs(fn.getbufinfo(cur_bufnr)[1].windows) do
+    cmd(string.format('%d wincmd w', fn.win_id2win(winid)))
+    cmd(cur_bufnr == buflisted[#buflisted].bufnr and 'bp' or 'bn')
+  end
+  cmd(string.format('%d wincmd w', cur_winnr))
+  local is_terminal = fn.getbufvar(cur_bufnr, '&buftype') == 'terminal'
+  cmd(is_terminal and 'bd! #' or 'silent! confirm bd #')
+end
+```
+
+Or in Vimscript:
+```vim
+function! s:delete_buffer()
+  let l:buflisted = getbufinfo({'buflisted': 1})
+  let [l:cur_winnr, l:cur_bufnr] = [winnr(), bufnr()]
+  if len(l:buflisted) < 2 | confirm qall | return | endif
+  for l:winid in getbufinfo(l:cur_bufnr)[0].windows
+    execute(win_id2win(l:winid) . 'wincmd w')
+    if l:cur_bufnr == l:buflisted[-1].bufnr | bp | else | bn | endif
+  endfor
+  execute(l:cur_winnr . 'wincmd w')
+  let l:is_terminal = getbufvar(l:cur_bufnr, '&buftype') == 'terminal'
+  if l:is_terminal | bd! # | else | silent! confirm bd # | endif
+endfunction
 ```
 
 ## License
