@@ -2,6 +2,9 @@
 -- By Olivier Roques
 -- github.com/ojroques
 
+-- Options
+local opts = {next = 'cycle'}  -- how to retrieve the next buffer
+
 -- Switch to buffer 'buf' on each window from list 'windows'
 local function switch_buffer(windows, buf)
   local cur_win = vim.fn.winnr()
@@ -14,8 +17,12 @@ end
 
 -- Select the first buffer with a number greater than given buffer
 local function get_next_buf(buf)
+  local next = vim.fn.bufnr('#')
+  if opts.next == 'alternate' and vim.fn.buflisted(next) == 1 then
+    return next
+  end
   for i = 0, vim.fn.bufnr('$') - 1 do
-    local next = (buf + i) % vim.fn.bufnr('$') + 1  -- will loop back to 1
+    next = (buf + i) % vim.fn.bufnr('$') + 1  -- will loop back to 1
     if vim.fn.buflisted(next) == 1 then
       return next
     end
@@ -65,4 +72,11 @@ local function delete_buffer(bufexpr, force)
   end
 end
 
-return {delete_buffer = delete_buffer}
+local function setup(user_opts)
+  opts = vim.tbl_extend('keep', user_opts, opts)
+end
+
+return {
+  delete_buffer = delete_buffer,
+  setup = setup,
+}
