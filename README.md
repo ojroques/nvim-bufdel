@@ -47,6 +47,19 @@ number):
 :BufDel <bufexpr>
 ```
 
+## Configuration
+You can pass options to the `setup()` function. Here are all options with their
+default settings:
+```lua
+require('bufdel').setup {
+  next = 'cycle'  -- or 'alternate'
+}
+```
+
+The `next` option is used to retrieve the next buffer to show after deleting
+one. By default the plugin cycles through buffers according to their number. To
+show instead the alternate buffer, set the option to `alternate`.
+
 ## Direct Integration
 The plugin fits in a [single file](./lua/bufdel.lua), you can very well download
 it and include it among your config files.
