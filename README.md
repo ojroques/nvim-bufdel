@@ -19,15 +19,14 @@ than the deleted one is selected instead (the one immediately to the right in
 the bufferline).
 
 ## Installation
-
 With [packer.nvim](https://github.com/wbthomason/packer.nvim):
 ```lua
 use {'ojroques/nvim-bufdel'}
 ```
 
-With [vim-plug](https://github.com/junegunn/vim-plug):
-```vim
-Plug 'ojroques/nvim-bufdel'
+With [paq-nvim](https://github.com/savq/paq-nvim):
+```lua
+paq {'ojroques/nvim-bufdel'}
 ```
 
 ## Usage
