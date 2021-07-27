@@ -9,7 +9,7 @@ Improvements:
   helpful when using a bufferline: we get the same behavior as closing tabs in
   Chrome / Firefox (see demo).
 * **Terminal buffers are deleted without prompt.**
-* **Exit Neovim when last buffer is deleted.** To disable it see [Configuration](#configuration)
+* **Exit Neovim when last buffer is deleted** ([configurable](#configuration)).
 
 ![demo](./demo.gif)
 
@@ -51,8 +51,8 @@ You can pass options to the `setup()` function. Here are all options with their
 default settings:
 ```lua
 require('bufdel').setup {
-  next = 'cycle'  -- or 'alternate'
-  quit = true  -- or false
+  next = 'cycle',  -- or 'alternate'
+  quit = true,
 }
 ```
 
@@ -60,8 +60,8 @@ The `next` option is used to retrieve the next buffer to show after deleting
 one. By default the plugin cycles through buffers according to their number. To
 show instead the alternate buffer, set the option to `alternate`.
 
-The `quit` option is used to decide whether to exit Neovim when closing last
-buffer.
+The `quit` option is used to decide whether or not to exit Neovim when closing
+last buffer.
 
 ## Direct Integration
 The plugin fits in a [single file](./lua/bufdel.lua), you can very well download
