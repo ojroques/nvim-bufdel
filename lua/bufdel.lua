@@ -3,7 +3,8 @@
 -- github.com/ojroques
 
 -- Options
-local opts = {next = 'cycle'}  -- how to retrieve the next buffer
+local opts = {next = 'cycle',  -- how to retrieve the next buffer
+              quit = true },  -- if true exit Neovim when last buffer is deleted
 
 -- Switch to buffer 'buf' on each window from list 'windows'
 local function switch_buffer(windows, buf)
@@ -44,14 +45,20 @@ end
 
 -- Delete given buffer, ignoring changes if 'force' is set
 local function delete_buffer(bufexpr, force)
-  -- exit neovim when there is only one buffer left
   if #vim.fn.getbufinfo({buflisted = 1}) < 2 then
-    if force then
-      vim.cmd('qall!')
+    if opts.quit then
+      -- exit neovim when there is only one buffer left
+      if force then
+        vim.cmd('qall!')
+      else
+        vim.cmd('confirm qall')
+      end
+      return
     else
-      vim.cmd('confirm qall')
+      -- don't exit neovim and create a new empty buffer
+      vim.cmd('enew')
+      vim.cmd('bp')
     end
-    return
   end
   local buf = get_buf(bufexpr)
   if vim.fn.buflisted(buf) == 0 then  -- exit if buffer number is invalid
