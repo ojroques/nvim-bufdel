@@ -3,7 +3,7 @@
 -- github.com/ojroques
 
 -- Options
-local opts = {
+local options = {
   next = 'cycle',  -- how to retrieve the next buffer
   quit = true,     -- exit when last buffer is deleted
 }
@@ -21,7 +21,7 @@ end
 -- Select the first buffer with a number greater than given buffer
 local function get_next_buf(buf)
   local next = vim.fn.bufnr('#')
-  if opts.next == 'alternate' and vim.fn.buflisted(next) == 1 then
+  if options.next == 'alternate' and vim.fn.buflisted(next) == 1 then
     return next
   end
   for i = 0, vim.fn.bufnr('$') - 1 do
@@ -48,7 +48,7 @@ end
 -- Delete given buffer, ignoring changes if 'force' is set
 local function delete_buffer(bufexpr, force)
   if #vim.fn.getbufinfo({buflisted = 1}) < 2 then
-    if opts.quit then
+    if options.quit then
       -- exit when there is only one buffer left
       if force then
         vim.cmd('qall!')
@@ -80,8 +80,10 @@ local function delete_buffer(bufexpr, force)
   end
 end
 
-local function setup(user_opts)
-  opts = vim.tbl_extend('keep', user_opts, opts)
+local function setup(user_options)
+  if user_options then
+    options = vim.tbl_extend('force', options, user_options)
+  end
 end
 
 return {
