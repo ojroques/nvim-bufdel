@@ -12,7 +12,7 @@ Improvements:
 * **Terminal buffers are deleted without prompt.**
 * **Exit Neovim when last buffer is deleted** ([configurable](#configuration)).
 
-![demo](./demo.gif)
+![demo](https://user-images.githubusercontent.com/23409060/188604956-51b33576-df09-41f2-aead-9d3685686d3f.gif)
 
 Here the same buffer is displayed in left and top-right window. Deleting that
 buffer preserves the window layout and the first buffer with a number greater
