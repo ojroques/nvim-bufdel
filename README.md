@@ -52,14 +52,18 @@ You can pass options to the `setup()` function. Here are all options with their
 default settings:
 ```lua
 require('bufdel').setup {
-  next = 'cycle',  -- or 'alternate'
+  next = 'tabs',  -- or 'cycle, 'alternate'
   quit = true,
 }
 ```
 
-The `next` option is used to retrieve the next buffer to show after deleting
-one. By default the plugin cycles through buffers according to their number. To
-show instead the alternate buffer, set the option to `alternate`.
+The `next` option determines the next buffer to display after deletion.
+Supported values:
+* `cycle`: cycle through buffers according to their number.
+* `tabs` (default): like `cycle` but when the last buffer is deleted, display
+  the new last buffer instead of going back to the first one.
+* `alternate`: switch to the alternate buffer (same behavior as without the
+  plugin).
 
 The `quit` option is used to decide whether or not to exit Neovim when closing
 last buffer.

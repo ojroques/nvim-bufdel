@@ -4,8 +4,8 @@
 
 -- Options
 local options = {
-  next = 'cycle',  -- how to retrieve the next buffer
-  quit = true,     -- exit when last buffer is deleted
+  next = 'tabs',  -- how to retrieve the next buffer
+  quit = true,    -- exit when last buffer is deleted
 }
 
 -- Switch to buffer 'buf' on each window from list 'windows'
@@ -20,16 +20,27 @@ end
 
 -- Select the first buffer with a number greater than given buffer
 local function get_next_buf(buf)
-  local next = vim.fn.bufnr('#')
-  if options.next == 'alternate' and vim.fn.buflisted(next) == 1 then
-    return next
-  end
-  for i = 0, vim.fn.bufnr('$') - 1 do
-    next = (buf + i) % vim.fn.bufnr('$') + 1  -- will loop back to 1
-    if vim.fn.buflisted(next) == 1 then
-      return next
+  if options.next == 'alternate' then
+    if vim.fn.buflisted(vim.fn.bufnr('#')) == 1 then
+      return vim.fn.bufnr('#')
     end
   end
+  local buffers, buf_index = {}, 1
+  for i, bufinfo in ipairs(vim.fn.getbufinfo({buflisted = 1})) do
+    if buf == bufinfo.bufnr then
+      buf_index = i
+    end
+    table.insert(buffers, bufinfo.bufnr)
+  end
+  if buf == buffers[#buffers] then
+    if options.next == 'cycle' then
+      return buffers[1]
+    end
+    if options.next == 'tabs' and #buffers > 1 then
+      return buffers[#buffers - 1]
+    end
+  end
+  return buffers[buf_index % #buffers + 1]
 end
 
 -- Retrieve the buffer associated to the given name or number
@@ -65,16 +76,17 @@ local function delete_buffer(bufexpr, force)
   if vim.fn.buflisted(buf) == 0 then  -- exit if buffer number is invalid
     return
   end
+  -- retrieve buffer and delete it while preserving window layout
   local next_buf = get_next_buf(buf)
   local windows = vim.fn.getbufinfo(buf)[1].windows
   switch_buffer(windows, next_buf)
-  -- force deletion of terminal buffers to avoid the prompt
+  -- force deletion of terminal buffers
   if force or vim.fn.getbufvar(buf, '&buftype') == 'terminal' then
     vim.cmd(string.format('bd! %d', buf))
   else
     vim.cmd(string.format('silent! confirm bd %d', buf))
   end
-  -- revert buffer switches if user has canceled deletion
+  -- revert buffer switches if deletion was cancelled
   if vim.fn.buflisted(buf) == 1 then
     switch_buffer(windows, buf)
   end
