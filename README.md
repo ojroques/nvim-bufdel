@@ -1,6 +1,6 @@
 # nvim-bufdel
 
-A very small Neovim plugin to improve the deletion of buffers.
+A small Neovim plugin to improve the deletion of buffers.
 
 Improvements:
 * **Preserve the layout of windows.** Deleting a buffer will no longer close any
@@ -48,32 +48,29 @@ number):
 ```
 
 ## Configuration
-You can pass options to the `setup()` function. Here are all options with their
-default settings:
+You can pass options to the `setup()` function. Here are the default options:
 ```lua
 require('bufdel').setup {
   next = 'tabs',  -- or 'cycle, 'alternate'
-  quit = true,
+  quit = true,    -- quit Neovim when last buffer is closed
 }
 ```
 
 The `next` option determines the next buffer to display after deletion.
 Supported values:
 * `cycle`: cycle through buffers according to their number.
-* `tabs` (default): like `cycle` but when the last buffer is deleted, display
-  the new last buffer instead of going back to the first one.
+* `tabs` (*default*): like `cycle` but when the buffer with highest number is
+  deleted, display the new highest buffer instead of going back to the first
+  one.
 * `alternate`: switch to the alternate buffer (same behavior as without the
   plugin).
-
-The `quit` option is used to decide whether or not to exit Neovim when closing
-last buffer.
 
 ## Direct Integration
 The plugin fits in a [single file](./lua/bufdel.lua), you can very well download
 it and include it among your config files.
 
 You can also integrate the command directly into your config. Here's a condensed
-version of the plugin (minus minor improvements) in Lua:
+version of the plugin in Lua:
 ```lua
 function delete_buffer()
   local buflisted = fn.getbufinfo({buflisted = 1})
