@@ -20,10 +20,9 @@ end
 
 -- Select the first buffer with a number greater than given buffer
 local function get_next_buf(buf)
-  if options.next == 'alternate' then
-    if vim.fn.buflisted(vim.fn.bufnr('#')) == 1 then
-      return vim.fn.bufnr('#')
-    end
+  local alternate = vim.fn.bufnr('#')
+  if options.next == 'alternate' and vim.fn.buflisted(alternate) == 1 then
+    return alternate
   end
   local buffers, buf_index = {}, 1
   for i, bufinfo in ipairs(vim.fn.getbufinfo({buflisted = 1})) do
@@ -32,13 +31,8 @@ local function get_next_buf(buf)
     end
     table.insert(buffers, bufinfo.bufnr)
   end
-  if buf == buffers[#buffers] then
-    if options.next == 'cycle' then
-      return buffers[1]
-    end
-    if options.next == 'tabs' and #buffers > 1 then
-      return buffers[#buffers - 1]
-    end
+  if options.next == 'tabs' and buf_index == #buffers and #buffers > 1 then
+    return buffers[#buffers - 1]
   end
   return buffers[buf_index % #buffers + 1]
 end
