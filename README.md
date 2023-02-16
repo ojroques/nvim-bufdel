@@ -11,6 +11,7 @@ Improvements:
   demo).
 * **Terminal buffers are deleted without prompt.**
 * **Exit Neovim when last buffer is deleted** ([configurable](#configuration)).
+* **Add a command to close all listed buffers except the current one.**
 
 ![demo](https://user-images.githubusercontent.com/23409060/188604956-51b33576-df09-41f2-aead-9d3685686d3f.gif)
 
@@ -45,6 +46,11 @@ Delete a buffer by its name or number (use quotes in case the buffer name is a
 number):
 ```vim
 :BufDel <bufexpr>
+```
+
+Delete all listed buffers except the current one (add `!` to ignore changes):
+```vim
+:BufDelOthers
 ```
 
 ## Configuration

@@ -7,6 +7,8 @@ if exists('g:loaded_bufdel')
 endif
 
 command! -nargs=? -bang -complete=buffer BufDel
-      \ lua require('bufdel').delete_buffer(<q-args>, '<bang>' == '!')
+      \ lua require('bufdel').delete_buffer_expr(<q-args>, '<bang>' == '!')
+command! -bang BufDelOthers
+      \ lua require('bufdel').delete_buffer_others('<bang>' == '!')
 
 let g:loaded_bufdel = 1
