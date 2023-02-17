@@ -2,7 +2,8 @@
 -- By Olivier Roques
 -- github.com/ojroques
 
--------------------- OPTIONS -------------------------------
+-------------------- VARIABLES -----------------------------
+local M = {}
 local options = {
   next = 'tabs',  -- how to retrieve the next buffer
   quit = true,    -- exit when last buffer is deleted
@@ -16,15 +17,17 @@ local function switch_buffer(windows, buf)
     vim.cmd(string.format('%d wincmd w', vim.fn.win_id2win(winid)))
     vim.cmd(string.format('buffer %d', buf))
   end
-  vim.cmd(string.format('%d wincmd w', cur_win))  -- return to original window
+  vim.cmd(string.format('%d wincmd w', cur_win))
 end
 
--- Select the first buffer with a number greater than given buffer
+-- Select the next buffer to display
 local function get_next_buf(buf)
+  -- handle 'alternate' choice
   local alternate = vim.fn.bufnr('#')
   if options.next == 'alternate' and vim.fn.buflisted(alternate) == 1 then
     return alternate
   end
+  -- build table mapping buffers to their actual position
   local buffers, buf_index = {}, 1
   for i, bufinfo in ipairs(vim.fn.getbufinfo({buflisted = 1})) do
     if buf == bufinfo.bufnr then
@@ -32,6 +35,7 @@ local function get_next_buf(buf)
     end
     table.insert(buffers, bufinfo.bufnr)
   end
+  -- select next buffer according to user choice
   if options.next == 'tabs' and buf_index == #buffers and #buffers > 1 then
     return buffers[#buffers - 1]
   end
@@ -40,7 +44,7 @@ end
 
 -- Delete a buffer, ignoring changes if 'force' is set
 local function delete_buffer(buf, force)
-  if vim.fn.buflisted(buf) == 0 then  -- exit if buffer number is invalid
+  if vim.fn.buflisted(buf) == 0 then
     return
   end
   -- retrieve buffer and delete it while preserving window layout
@@ -60,11 +64,11 @@ local function delete_buffer(buf, force)
 end
 
 -------------------- PUBLIC --------------------------------
--- Delete given buffer, ignoring changes if 'force' is set
-local function delete_buffer_expr(bufexpr, force)
+-- Delete a given buffer, ignoring changes if 'force' is set
+function M.delete_buffer_expr(bufexpr, force)
   if #vim.fn.getbufinfo({buflisted = 1}) < 2 then
+    -- exit when there is only one buffer left
     if options.quit then
-      -- exit when there is only one buffer left
       if force then
         vim.cmd('qall!')
       else
@@ -72,11 +76,12 @@ local function delete_buffer_expr(bufexpr, force)
       end
       return
     end
-    -- don't exit and create a new empty buffer
+    -- don't exit and create a new empty buffer instead
     vim.cmd('enew')
     vim.cmd('bp')
   end
-  if not bufexpr then  -- return current buffer when 'bufexpr' is nil
+  -- retrieve buffer number from buffer expression
+  if not bufexpr then
     delete_buffer(vim.fn.bufnr(), force)
   end
   if tonumber(bufexpr) then
@@ -87,8 +92,8 @@ local function delete_buffer_expr(bufexpr, force)
   delete_buffer(vim.fn.bufnr(bufexpr), force)
 end
 
--- Delete all buffers except current, ignoring changes if 'force' is set
-local function delete_buffer_others(force)
+-- Delete all listed buffers except current, ignoring changes if 'force' is set
+function M.delete_buffer_others(force)
   for _, bufinfo in ipairs(vim.fn.getbufinfo({buflisted = 1})) do
     if bufinfo.bufnr ~= vim.fn.bufnr() then
       delete_buffer(bufinfo.bufnr, force)
@@ -96,14 +101,11 @@ local function delete_buffer_others(force)
   end
 end
 
-local function setup(user_options)
+function M.setup(user_options)
   if user_options then
     options = vim.tbl_extend('force', options, user_options)
   end
 end
 
-return {
-  delete_buffer_expr = delete_buffer_expr,
-  delete_buffer_others = delete_buffer_others,
-  setup = setup,
-}
+------------------------------------------------------------
+return M
