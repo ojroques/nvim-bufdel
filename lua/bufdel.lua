@@ -81,11 +81,13 @@ function M.delete_buffer_expr(bufexpr, force)
     vim.cmd('bp')
   end
   -- retrieve buffer number from buffer expression
-  if not bufexpr then
+  if bufexpr == nil then
     delete_buffer(vim.fn.bufnr(), force)
+    return
   end
   if tonumber(bufexpr) then
     delete_buffer(tonumber(bufexpr), force)
+    return
   end
   bufexpr = string.gsub(bufexpr, [[^['"]+]], '')  -- escape any start quote
   bufexpr = string.gsub(bufexpr, [[['"]+$]], '')  -- escape any end quote
