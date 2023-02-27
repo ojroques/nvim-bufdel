@@ -103,6 +103,12 @@ function M.delete_buffer_others(force)
   end
 end
 
+-- Delete all listed buffers, ignoring changes if 'force' is set
+function M.delete_buffer_all(force)
+  M.delete_buffer_others(force)
+  M.delete_buffer_expr(nil, force)
+end
+
 function M.setup(user_options)
   if user_options then
     options = vim.tbl_extend('force', options, user_options)
