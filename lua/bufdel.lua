@@ -6,7 +6,7 @@
 local M = {}
 local options = {
   next = 'tabs',  -- how to retrieve the next buffer
-  quit = true,    -- exit when last buffer is deleted
+  quit = true,    -- quit Neovim when last buffer is closed
 }
 
 -------------------- PRIVATE -------------------------------
@@ -26,6 +26,10 @@ local function get_next_buf(buf)
   local alternate = vim.fn.bufnr('#')
   if options.next == 'alternate' and vim.fn.buflisted(alternate) == 1 then
     return alternate
+  end
+  -- handle custom function
+  if type(options.next) == 'function' then
+    return options.next()
   end
   -- build table mapping buffers to their actual position
   local buffers, buf_index = {}, 1

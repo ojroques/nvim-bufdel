@@ -63,8 +63,8 @@ Delete all listed buffers except the current one (add `!` to ignore changes):
 You can pass options to the `setup()` function. Here are the default options:
 ```lua
 require('bufdel').setup {
-  next = 'tabs',  -- or 'cycle, 'alternate'
-  quit = true,    -- quit Neovim when last buffer is closed
+  next = 'tabs',
+  quit = true,  -- quit Neovim when last buffer is closed
 }
 ```
 
@@ -76,3 +76,4 @@ Supported values:
   one.
 * `alternate`: switch to the alternate buffer (same behavior as without the
   plugin).
+* You can also pass your own function to select the next buffer.
